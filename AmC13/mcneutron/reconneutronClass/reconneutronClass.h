@@ -1,0 +1,153 @@
+#ifndef reconneutronClass_h
+#define reconneutronClass_h
+
+#include <algorithm>
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
+#include "TROOT.h"
+#include "TChain.h"
+#include "TFile.h"
+#include "TH2F.h"
+#include "TH1F.h"
+#include "TNtuple.h"
+#include "TString.h"
+#include "TRint.h"
+#include "TCanvas.h"
+#include "TLegend.h"
+#include "TMath.h"
+ 
+using namespace std;
+
+struct Event{
+Event():
+  event_id(0),event_pdg(0),source_ene(0),source_x(0),source_y(0),source_z(0),
+    source_px(0),source_py(0),source_pz(0),sourcer(0),sourcetheta(0),
+    volume(0),et(0),ex(0),ey(0),ez(0),edep(0),eqch(0),quenchingfactor(0)
+  {}
+  
+  Int_t           event_id;
+  Int_t           event_pdg;
+  Float_t         source_ene;
+  Float_t         source_x;
+  Float_t         source_y;
+  Float_t         source_z;
+  Float_t         sourcer;
+  Float_t         sourcetheta;
+  Float_t         source_px;
+  Float_t         source_py;
+  Float_t         source_pz;
+  vector<TString> *volume;
+  vector<double>  *et;
+  vector<double>  *ex;
+  vector<double>  *ey;
+  vector<double>  *ez;
+  vector<double>  *edep;
+  vector<double>  *eqch;
+  vector<double>  *quenchingfactor;
+};
+
+struct Plots{
+Plots():
+  ntuple_plots(0),eqch_hist(0),
+    eqch_sourceene_hist(0),eqch_sourcetheta_hist(0),
+    eqch_time_hist(0),eqch_theta_hist(0),eqch_radius_hist(0)
+  {}
+  
+  TNtuple* ntuple_plots;
+  TH1F* eqch_hist;
+  
+  TH2F* eqch_sourceene_hist;
+  TH2F* eqch_sourcetheta_hist;
+  TH2F* eqch_time_hist;
+  TH2F* eqch_theta_hist;
+  TH2F* eqch_radius_hist;
+
+  void SavePlots()
+  {
+    ntuple_plots->Write();
+    eqch_hist->Write();
+    eqch_sourceene_hist->Write();
+    eqch_sourcetheta_hist->Write();
+    eqch_time_hist->Write();
+    eqch_theta_hist->Write();
+    eqch_radius_hist->Write();
+  }  
+};
+
+class reconneutronClass:public TObject{
+ public:
+  TChain* fChain;
+  Event e;
+  std::vector<Plots> p;
+
+ reconneutronClass(TChain * /*tree*/ =0) : fChain(0),
+    head(0), eqch_bins(0),time_bins(0),total_bins(0),
+    source_ntuple(0)
+      { }
+  virtual ~reconneutronClass() { }
+  
+  virtual void LoadTree(TChain* fchain, Event& e);
+  void SetTRint(TRint *rint){fRint = rint;}
+  void SetTChain(TChain *var) { fChain = var; }
+  bool VerifyDataFile(TString);
+  void ReadDataFile(TChain* , int, int, string);
+  void Init();
+  void BookHistograms();
+  void FillHistograms();
+  void LoopOverEvent(Long64_t );
+  void SaveHistograms();
+
+  void SetInPath(string var) { inpath = var; }
+  string GetInPath() { return inpath; }
+  void SetInMiddle(string var) { inmiddle = var; }
+  string GetInMiddle() { return inmiddle; }  
+  void SetOutPath(string var) { outpath = var; }
+  string GetOutPath() { return outpath; }
+  void SetOutFile(TString var) { outfile = var; }
+  TString GetOutFile() { return outfile; } 
+  
+ private:
+  TRint* fRint;
+  string inpath;
+  string inmiddle;
+  string outpath;
+  TString outfile;
+  vector<string> head;
+  vector<int> eqch_bins;
+  vector<int> total_bins;
+  int time_bins;
+  TNtuple *source_ntuple;
+
+  ClassDef(reconneutronClass,0);  
+};
+//#endif
+
+			//#ifdef reconneutronClass_cxx
+inline void reconneutronClass::LoadTree(TChain* fChain, Event& e)
+{
+
+  fChain->SetBranchAddress("event_id", &e.event_id);
+  fChain->SetBranchAddress("event_pdg", &e.event_pdg);
+  fChain->SetBranchAddress("source_ene", &e.source_ene);
+  fChain->SetBranchAddress("source_x", &e.source_x);
+  fChain->SetBranchAddress("source_y", &e.source_y);
+  fChain->SetBranchAddress("source_z", &e.source_z);
+  fChain->SetBranchAddress("source_px", &e.source_px);
+  fChain->SetBranchAddress("source_py", &e.source_py);
+  fChain->SetBranchAddress("source_pz", &e.source_pz);
+  fChain->SetBranchAddress("volume", &e.volume);
+  fChain->SetBranchAddress("et", &e.et);
+  fChain->SetBranchAddress("ex", &e.ex);
+  fChain->SetBranchAddress("ey", &e.ey);
+  fChain->SetBranchAddress("ez", &e.ez);
+  fChain->SetBranchAddress("edep", &e.edep);
+  fChain->SetBranchAddress("eqch", &e.eqch);
+  fChain->SetBranchAddress("quenchingfactor", &e.quenchingfactor);
+
+}
+
+#endif

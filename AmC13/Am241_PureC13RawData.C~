@@ -1,0 +1,32 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
+
+using namespace std;
+
+int Am241_PureC13RawData()
+{
+  string indir = "/darkside/users/hqian/AmC13/";
+  string infile = indir + "Am241_Pure13CAlphaNSpec.root";
+  TFile *indata = new TFile(infile.c_str());
+  TGraph *Am241_graph = (TGraph*) indata->Get("Total");
+  
+  Int_t N = Am241_graph->GetN(); 
+  Double_t* Energy = Am241_graph->GetX();
+  Double_t* Probability = Am241_graph->GetY();
+
+  string outdir = indir;
+  string outdataname = outdir+"Am241C13.txt";
+  ofstream outdata (outdataname.c_str());
+  if(outdata.is_open())
+    {
+      outdata<<"Energy\t"<<"Neutron Yield"<<"\n";
+      for(int i=0; i<N; i++)
+	outdata<<*(Energy+i)<<"\t"<<*(Probability+i)<<"\n";
+    }
+  else cout<<"Cannot open the file"<<endl;
+  outdata.close();
+
+  return 1;
+}
